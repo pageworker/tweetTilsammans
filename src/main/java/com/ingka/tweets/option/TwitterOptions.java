@@ -10,7 +10,7 @@ import org.apache.beam.sdk.options.Validation;
  * The {@link TwitterPipeline.Options} class provides the custom execution options passed by the
  * executor at the command-line.
  */
-public interface TwitterOptions  extends DataflowPipelineOptions {
+public interface TwitterOptions extends DataflowPipelineOptions {
 
     @Description("The API key to use with the Twitter API.")
     @Validation.Required
@@ -42,17 +42,21 @@ public interface TwitterOptions  extends DataflowPipelineOptions {
 
     void setTwitterQuery(String value);
 
-    @Description("The fully qualified name of the table to be inserted into.")
-    @Validation.Required
-    String getOutputBigQueryTable();
+    @Description("JDBC Hostanme url")
+    @Default.String("jdbc:postgresql://localhost:5432/atp")
+    String getJdbcHostNameURL();
 
-    void setOutputBigQueryTable(String value);
+    void setJdbcHostNameURL(String jdbcHostNameURL);
 
-    @Description("The path to the staging directory used by BQ prior to loading the data.")
-    @Default.String("")
-    @Validation.Required
-    String getTemporaryBQLocation();
+    @Description("JDBC username")
+    @Default.String("atp")
+    String getJdbcUsername();
 
-    void setTemporaryBQLocation(String value);
+    void setJdbcUsername(String jdbcUsername);
 
+    @Description("JDBC password")
+    @Default.String("atp")
+    String getJdbcPassword();
+
+    void setJdbcPassword(String jdbcPassword);
 }

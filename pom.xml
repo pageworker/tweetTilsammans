@@ -262,6 +262,7 @@
           <version>${jackson.version}</version>
           <scope>runtime</scope>
         </dependency>
+
         <!-- [BEAM-3519] GCP IO exposes netty on its API surface, causing conflicts with runners -->
         <dependency>
           <groupId>org.apache.beam</groupId>
@@ -278,6 +279,9 @@
             </exclusion>
           </exclusions>
         </dependency>
+
+
+
       </dependencies>
     </profile>
     <profile>
@@ -343,6 +347,14 @@
   </profiles>
 
   <dependencies>
+
+    <!-- postgres driver -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.3.3</version>
+    </dependency>
+
     <!-- Adds a dependency on the Beam SDK. -->
     <dependency>
       <groupId>org.apache.beam</groupId>

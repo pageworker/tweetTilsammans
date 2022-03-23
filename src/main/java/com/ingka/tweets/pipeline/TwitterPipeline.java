@@ -1,15 +1,16 @@
 package com.ingka.tweets.pipeline;
 
 import com.google.api.services.bigquery.model.TableFieldSchema;
-import com.google.api.services.bigquery.model.TableRow;
 import com.google.api.services.bigquery.model.TableSchema;
+import com.ingka.tweets.config.PostgresConstants;
 import com.ingka.tweets.connector.TwitterReader;
 import com.ingka.tweets.model.BeamTweet;
 import com.ingka.tweets.option.TwitterOptions;
+import com.ingka.tweets.sink.PostgresTweetSink;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.jdbc.JdbcIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -34,7 +35,12 @@ public class TwitterPipeline {
      *
      * @param args The command-line args passed by the executor.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
+
+
+            Class.forName("org.postgresql.Driver");
+            //on classpath
+
         TwitterOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(TwitterOptions.class);
         run(options);
     }
@@ -73,6 +79,7 @@ public class TwitterPipeline {
                 new TableFieldSchema().setName("createdAt").setType("DATETIME"),
                 new TableFieldSchema().setName("language").setType("STRING")));
 
+
         // -- Create the pipeline
         Pipeline pipeline = Pipeline.create(options);
 
@@ -80,7 +87,7 @@ public class TwitterPipeline {
         options.setPubsubRootUrl("http://localhost:8085");
         options.setJobName("twitter-dm-" + System.currentTimeMillis());
 
-
+        PostgresTweetSink postgresTweetSink = new PostgresTweetSink(getDataSourceConfiguration(options));
         pipeline.apply("ReadTweets", TwitterReader.read(vp(options.getApiKey()),
                         vp(options.getApiSecret()),
                         vp(options.getAccessToken()),
@@ -88,25 +95,29 @@ public class TwitterPipeline {
                         vp(options.getTwitterQuery())))
                 //write to output log for debugging purpose
                 .apply("LoggingAll", ParDo.of(new OutputLines()))
-                //sink your tweets
-                .apply("SaveToBq", BigQueryIO.<BeamTweet>write().to(options.getOutputBigQueryTable())
-                        .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
-                        .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
-                        .withFormatFunction(
-                                (BeamTweet t) ->
-                                        new TableRow().set("id", t.getId())
-                                                .set("tweet", t.getText())
-                                                .set("lang", t.getLanguage())
-                                                .set("created_at", t.getCreatedAt())
-                        )
-                        .withSchema(outputSchema)
-                        .withCustomGcsTempLocation(vp(options.getTemporaryBQLocation())));
+                //sink the tweets
+                .apply("SaveToSQL", postgresTweetSink.getUpsertSink());
 
         log.info("Building pipeline...");
 
         return pipeline.run();
     }
 
+    /**
+     * Get data source configuration
+     *
+     * @param options the options
+     * @return data source configuration
+     */
+    public static JdbcIO.DataSourceConfiguration getDataSourceConfiguration(TwitterOptions options) {
+
+        final JdbcIO.DataSourceConfiguration dataSourceConfiguration = JdbcIO.DataSourceConfiguration
+                .create(PostgresConstants.ORG_POSTGRESQL_DRIVER, options.getJdbcHostNameURL());
+        final JdbcIO.DataSourceConfiguration dataSource = dataSourceConfiguration
+                .withUsername(options.getJdbcUsername()).withPassword(options.getJdbcPassword());
+
+        return dataSource;
+    }
 
     static class OutputLines extends DoFn<BeamTweet, BeamTweet> {
 
