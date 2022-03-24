@@ -16,12 +16,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BeamTweet implements Serializable {
+public class BeamTweet{
     public String id;
     public String text;
     public Date createdAt;
     public String language;
-    
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

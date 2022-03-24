@@ -12,11 +12,11 @@ import org.joda.time.Duration;
 
 import java.sql.PreparedStatement;
 
-
 @RequiredArgsConstructor
 public class PostgresTweetSink {
 
-    private final static String SQL_STATEMENT = "INSERT INTO ikea_tweets (id, \"text\", created_at, \"language\")    VALUES(?, ?, ?, ?);";
+    //upsert query but don't update in case of duplicate key
+    private final static String SQL_STATEMENT = "INSERT INTO ikea_tweets (id, \"text\", created_at, \"language\")    VALUES(?, ?, ?, ?) ON CONFLICT DO NOTHING";
     private final DataSourceConfiguration dataSource;
 
 

@@ -2,7 +2,6 @@ package com.ingka.tweets.connector;
 
 
 import com.github.redouane59.twitter.TwitterClient;
-import com.github.redouane59.twitter.dto.tweet.Geo;
 import com.github.redouane59.twitter.dto.tweet.Tweet;
 import com.github.redouane59.twitter.signature.TwitterCredentials;
 import com.ingka.tweets.model.BeamTweet;
@@ -95,6 +94,9 @@ public class TwitterReader {
         }
 
 
+        /**
+         * Initialising the twitter client
+         */
         @Setup
         public void initClient() {
 
@@ -120,7 +122,7 @@ public class TwitterReader {
                 OutputReceiver<BeamTweet> outputReceiver) {
 
             //create the query and select the last 24h.
-            LocalDateTime dateFrom = LocalDateTime.now(UTC).plusDays(-1L);
+            LocalDateTime dateFrom = LocalDateTime.now(UTC).plusDays(-2L);
             LocalDateTime dateTo = LocalDateTime.now(UTC).plusSeconds(-60L);
             List<Tweet> tweets = this.client.searchForTweetsWithin7days(twitterQuery, dateFrom, dateTo);
 

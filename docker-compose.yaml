@@ -1,8 +1,23 @@
 version: "3.5"
 services:
-  pubsub:
-    image: messagebird/gcloud-pubsub-emulator:latest
-    ports:
-      - 8085:8681
+  db:
+    image: "postgres"
+    restart: always
+    command: postgres -c default_transaction_isolation=serializable
     environment:
-      - PUBSUB_PROJECT1=twitter-dm,twitter-feed:tweets
+      POSTGRES_USER: atp
+      POSTGRES_PASSWORD: atp
+      POSTGRES_DB: atp
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
+volumes:
+  postgres:

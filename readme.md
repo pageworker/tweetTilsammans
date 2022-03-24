@@ -11,79 +11,29 @@ store them in a BigQuery to be used for analytical purposes
 # Prerequisite
 
 * JAVA 11
-* Python 3.6
-
 
 # Step 1
 
 ##Docker compose 
-Before you can run this project localy you need to know that this project uses a few resources like pubsub and big table. 
-In order to start, simple run the from the root of this project the following steps.
-docker compose file.
+Before you can run this project locally you need to know that this project uses a few resources like pubsub and big table. 
+In order to start, simple run the docker compose found at the root of this project the following steps.
 
-Start the pubsub emulator:
+Starting dev resources
 ```sh
 docker compose up -d
 ```
 
-it also uses the BigTable emulator:
-```sh
-gcloud components update beta
-gcloud beta emulators bigtable start
-```
-
-after the emulator has started run the command below to init your environment
-before you start the pipeline locally
-```shell
-$(gcloud beta emulators bigtable env-init)
-```
+after booting the postgres database use the schema.sql to create the table
+using your favorite sql editor.
 
 
 
-# Step 2
-
- # Big Qeuery 
-## start the emulat or
- gcloud beta emulators bigtable start
-
- ## Init the env where you run the pipe
- $(gcloud beta emulators bigtable env-init)
-
- ## install cbt
- gcloud components install cbt 
-
- ### set config 
-
-echo project = $PROJECT_ID > ~/.cbtrc
-echo instance = test-instance >> ~/.cbtrc
-
-### verify content of file
-cat ~/.cbtrc
-
-### Create tables
-cbt createtable inventory-item
-### list tables 
-cbt ls
-
-
-To run and publish events
-```
-export MAIN_CLASS_NAME=org.ikea.nl.dm.helper.PublisherExample
-mvn compile exec:java \
--Dexec.mainClass=${MAIN_CLASS_NAME}  -Dexec.args="-name inventory_alerts"
-```
-
-
-# Create BiqQuery Dataset
-bq mk --location=europe-west4 logs
-
-
-
-# Step 2
 
 ## Run the pipeline 
 
 To run execute after starting local infra defined above
+
+set the environment variables
 
 ## Env vars
 ```sh
@@ -101,6 +51,8 @@ export twitter_query=IKEA
 
 ## execute
 
+The the last step : execute the pipeline
+
 ```sh
  mvn compile -X exec:java \
 -Dexec.mainClass=${MAIN_CLASS_NAME} \
@@ -110,6 +62,8 @@ export twitter_query=IKEA
  --accessToken=${access_token} \
  --accessTokenSecret=${access_token_secret} \
  --twitterQuery=${twitter_query} \
- --outputBigQueryTable=twitter-dm:ikea.tweets \
+ --jdbcHostNameURL=jdbc:postgresql://localhost:5432/atp \
+ --jdbcUsername=atp \
+ --jdbcPassword=atp \
  --project=twitter-dm --runner=${RUNNER}"
 ```
