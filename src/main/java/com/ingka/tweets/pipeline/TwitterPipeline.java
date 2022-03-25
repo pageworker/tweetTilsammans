@@ -38,8 +38,8 @@ public class TwitterPipeline {
     public static void main(String[] args) throws ClassNotFoundException {
 
 
-            Class.forName("org.postgresql.Driver");
-            //on classpath
+        Class.forName("org.postgresql.Driver");
+        //on classpath
 
         TwitterOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(TwitterOptions.class);
         run(options);
@@ -113,17 +113,16 @@ public class TwitterPipeline {
 
         final JdbcIO.DataSourceConfiguration dataSourceConfiguration = JdbcIO.DataSourceConfiguration
                 .create(PostgresConstants.ORG_POSTGRESQL_DRIVER, options.getJdbcHostNameURL());
-        final JdbcIO.DataSourceConfiguration dataSource = dataSourceConfiguration
+        return dataSourceConfiguration
                 .withUsername(options.getJdbcUsername()).withPassword(options.getJdbcPassword());
 
-        return dataSource;
     }
 
-    static class OutputLines extends DoFn<BeamTweet, BeamTweet> {
+    public static class OutputLines extends DoFn<BeamTweet, BeamTweet> {
 
         @ProcessElement
         public void processElement(@Element BeamTweet message, OutputReceiver<BeamTweet> receiver) {
-            log.info("-------------    id {} \t\t, message {}, \t\t createdAt {} , \t\t sold {}   -----------------", message.getId(), message.getText(), message.getCreatedAt());
+            log.info("-------------    id {} \t\t, message {}, \t\t createdAt {} , \t\t language {}   -----------------", message.getId(), message.getText(), message.getCreatedAt(),message.getLanguage());
             receiver.output(message);
         }
     }

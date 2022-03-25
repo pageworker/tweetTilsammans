@@ -25,7 +25,7 @@ docker compose up -d
 
 after booting the postgres database use the schema.sql to create the table
 using your favorite sql editor.
-
+    
 
 
 

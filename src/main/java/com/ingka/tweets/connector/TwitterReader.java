@@ -34,6 +34,7 @@ public class TwitterReader {
                                   ValueProvider<String> accessToken,
                                   ValueProvider<String> accessTokenSecret,
                                   ValueProvider<String> twitterUser) {
+        //create and return the custom connector
         return new ListTweets(
                 twitterUser,
                 apiKey,
@@ -122,7 +123,7 @@ public class TwitterReader {
                 OutputReceiver<BeamTweet> outputReceiver) {
 
             //create the query and select the last 24h.
-            LocalDateTime dateFrom = LocalDateTime.now(UTC).plusDays(-2L);
+            LocalDateTime dateFrom = LocalDateTime.now(UTC).plusDays(-1L);
             LocalDateTime dateTo = LocalDateTime.now(UTC).plusSeconds(-60L);
             List<Tweet> tweets = this.client.searchForTweetsWithin7days(twitterQuery, dateFrom, dateTo);
 
